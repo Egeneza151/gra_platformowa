@@ -136,13 +136,14 @@ class Player(pygame.sprite.Sprite):
                         self.image = gm.JUMP_R
 
             # sprawdzamy kolizję z przedmiotami
+            #sprawdza kolizje z bronia
             colliding_items = pygame.sprite.spritecollide(
                 self, self.level.set_of_items, False)
             for item in colliding_items:
                 if item.name == 'weapon':
                     self.items[item.name] = 1
                     item.kill()
-
+            # sprawdza kolizje z sercami
             colliding_hearts = pygame.sprite.spritecollide(
                 self, self.level.set_of_hearts, False)
             for heart in colliding_hearts:
@@ -150,7 +151,7 @@ class Player(pygame.sprite.Sprite):
                     self.hearts[heart.name] = 1
                     self.number_of_lifes += 1
                     heart.kill()
-
+            # sprawdza kolizje z coinami
             colliding_coins = pygame.sprite.spritecollide(
                 self, self.level.set_of_coins, False)
             for coin in colliding_coins:
@@ -162,7 +163,7 @@ class Player(pygame.sprite.Sprite):
             colliding_doors = pygame.sprite.spritecollide(
                 self, self.level.set_of_doors, False)
 
-
+            #sprawdza kolizje z drzwiami i przesuwa gracza
             print(self.door_count)
             if self.door_count == 0:
                 for door in colliding_doors:
@@ -172,21 +173,21 @@ class Player(pygame.sprite.Sprite):
                         else:
                             self.rect.x -= 1000
                         self.door_count += 1
-
+            #operuje na liczniku drzwi, z ktorych mozna ponownie skorzystac
             else:
                 self.door_count += 1
                 if self.door_count == 40:
                     self.door_count = 0
                     for door in colliding_doors:
                         door.online = True
-
+        #jezeli gracz posiada 0 lub mniej zyc to umiera
         else:
             self.game_over()
 
-
+    #rysowanie animacji
     def draw(self, surface):
         surface.blit(self.image, self.rect)
-
+    #dzialanie na klawiszach
     def get_event(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_d:
@@ -204,7 +205,7 @@ class Player(pygame.sprite.Sprite):
             if event.key == pygame.K_a and self.movement_x < 0:
                 self.stop()
                 self.image = gm.STAND_L
-
+    #rysowanie animacji co 4 klatki
     def _move(self, image_list):
         if self._count < 4:
             self.image = image_list[0]
@@ -215,19 +216,19 @@ class Player(pygame.sprite.Sprite):
             self._count = 0
         else:
             self._count += 1
-
+    #grawitacja gracza
     def _gravitation(self):
         if self.movement_y == 0:
             self.movement_y = 2
         else:
             self.movement_y += 0.35
-
+    #pobiera ilosc monet
     def get_coins(self):
         return "COINS: " + str(self.number_of_coins)
-
+    #pobiera ilosc zyc
     def get_lifes(self):
         return "LIFES: " + str(self.number_of_lifes)
-
+    #rysuje i przesowa trupa
     def _die(self, image_list):
         if self.die_count < 4:
             self.image = image_list[0]
@@ -252,10 +253,10 @@ class Player(pygame.sprite.Sprite):
             self.rect.y += 2
 
         self.die_count += 1
-
+        #jezeli licznik sie skonczyl to ustawia licznik na podana liczbe
         if self.die_count >= 28:
             self.door_count = 29
-
+    #ustawia liczbe zyc na 0 i wykonuje metode smierci oraz rysuje na ekranie zakonczenie gry oraz zmienia tlo
     def game_over(self):
         self.number_of_lifes = 0
         self._die(gm.IMAGES_DIE_R)
@@ -264,7 +265,7 @@ class Player(pygame.sprite.Sprite):
         textsurface = myfont.render("GAME OVER", False, (0, 0, 0))
         screen.blit(textsurface, (300, -40))
 
-
+#klasa przeciwnika
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, star_image, image_list_right,
                  image_list_left, image_list_right_dead, image_list_left_dead,image_list_attack_right, image_list_attack_left, start, bound_l, bound_r,
@@ -292,14 +293,16 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x = start
         self.rect.y = self.movement_y
 
-
+    #glowna metoda aktualizacji przeciwnika
     def update(self):
+        #jezeli przeciwnik nie zyje i jego licznik jest wiekszy od zadanej liczby to umiera
         if not self.lifes and self._count > 7:
             self.kill()
 
         self.rect.x += self.movement_x
 
         #animacja
+        #jezeli zyje to wykonuje
         if self.lifes:
             # zasieg ataku #-41 i 72
             distance_between_player = self.rect.x - player.rect.x
@@ -315,6 +318,7 @@ class Enemy(pygame.sprite.Sprite):
                     self._move(self.image_list_right)
                 if self.movement_x < 0:
                     self._move(self.image_list_left)
+        #jezeli umarl to wykonuje sie animacja smierci
         else:
             if self.direction_of_movement == 'right':
                 self._move(self.image_list_right_dead)
@@ -325,22 +329,21 @@ class Enemy(pygame.sprite.Sprite):
         if pygame.sprite.collide_rect(self, self.player):
             if self.player.direction_of_movement == 'left':
                 self.player.rect.left = self.rect.right
-                #odpychanie
+                #odpychanie gracza od przeciwnika
                 self.repulsion(80)
             elif self.player.direction_of_movement == 'right':
                 self.player.rect.right = self.rect.left
-                # odpychanie
+                # odpychanie gracza od przeciwnika
                 self.repulsion(-80)
             self.player.number_of_lifes -= 1
 
-            # ruch w poziomie
+         # ruch w poziomie
         position = self.rect.x - self.player.level.world_shift
         if (position < self.boundary_left
                 or position > self.boundary_right):
             self.movement_x *= -1
 
-
-
+    # rysowanie animacji co 4 klatki
     def _move(self, image_list):
         if self._count < 4:
             self.image = image_list[0]
@@ -352,17 +355,18 @@ class Enemy(pygame.sprite.Sprite):
         else:
             self._count += 1
 
-
+    #obrot w prawo
     def turn_right(self):
         if self.direction_of_movement == 'left':
             self.direction_of_movement = 'right'
         self.movement_x = 6
-
+    #obrot w lewo
     def turn_left(self):
         if self.direction_of_movement == 'right':
             self.direction_of_movement = 'left'
             self.movement_x = -6
 
+    # odpychanie gracza od przeciwnika
     def repulsion(self, distance):
         self.player.rect.x += distance
 
@@ -380,7 +384,7 @@ class PlatformEnemy(Enemy):
         self.rect.centerx = random.randint(self.platform.rect.letf + self.rect.width//2,
                                            self.platform.rect.right - self.rect.width//2,)
 
-
+    # rysowanie animacji co 4 klatki
     def _move(self, image_list):
         if self._count < 4:
             self.image = image_list[0]
@@ -404,14 +408,20 @@ class Platform(pygame.sprite.Sprite):
         self.rect.y = rect_y
         self.image_list = image_list
         self.flag_position = flag_position
-
+    #rysowanie platformy
     def draw(self, surface):
+        #jezeli jego szerokosc jest pojedyncza to sie wykona
         if self.width == 64:
+            #jezeli jego wysokosc jest wiecej niz pojedyncza to sie wykona
             if self.height > 64:
+                #strona lewa
                 if self.flag_position == 'left':
+                    #rysowanie
                     for i in range(64, self.height - 64, 64):
                         surface.blit(self.image_list[4], [self.rect.x, self.rect.y + i])
+                #strona prawa
                 elif self.flag_position == 'right':
+                    # rysowanie
                     for i in range(64, self.height - 64, 64):
                         surface.blit(self.image_list[5], [self.rect.x, self.rect.y + i])
             else:
@@ -433,7 +443,7 @@ class MovingPlatform(Platform):
         self.boundary_right = 0
         self.boundary_left = 0
         self.player = None
-
+    #glowna metoda aktualizujaca
     def update(self):
         # ruch prawo/lewo
         self.rect.x += self.movement_x
@@ -465,7 +475,6 @@ class MovingPlatform(Platform):
                 or position + self.width > self.boundary_right):
             self.movement_x *= -1
 
-
 # ogólna klasa przedmiotu
 class Item(pygame.sprite.Sprite):
     def __init__(self, image, name, rect_center_x, rect_center_y):
@@ -483,7 +492,7 @@ class Bullet(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = [rect_center_x, rect_center_y]
         self.direction_of_movement = direction
-
+    #glowna metoda aktualizacji
     def update(self):
         if self.direction_of_movement == 'right':
             self.rect.x += 15
@@ -509,7 +518,7 @@ class Coin(pygame.sprite.Sprite):
 
         self._count = 0
         self.draw(self.image_list)
-
+    #rysowanie monety co 4 klatki
     def draw(self, image_list):
         if self._count < 4:
             self.image = image_list[0]
@@ -528,7 +537,7 @@ class Coin(pygame.sprite.Sprite):
             self._count = 0
         else:
             self._count += 1
-
+#klasa drzwi
 class Door(pygame.sprite.Sprite):
     def __init__(self, image, name, rect_center_x, rect_center_y):
         super().__init__()
@@ -550,18 +559,18 @@ class Level:
         self.set_of_doors = pygame.sprite.Group()
         self.player = player
         self.world_shift = 0
-
+    #glowna metoda aktualizacji
     def update(self):
         self._delete_bullet()
-        self._respawn()
-
+        self.die_player()
+        #aktualizacja platform
         for p in self.set_of_platforms:
             p.update()
-
+        #aktualizacja pociskow, wrogow i drzwi
         self.set_of_bullets.update()
         self.set_of_enemies.update()
         self.set_of_doors.update()
-
+        #rysowanie monet
         for e in self.set_of_coins:
             e.draw(gm.COINS)
 
@@ -577,44 +586,46 @@ class Level:
             self.player.rect.left = 150
             self._shift_world(diff)
 
-
+    #rysowanie
     def draw(self, surface):
+        #rysowanie platform
         for p in self.set_of_platforms:
             p.draw(surface)
-
+        #rysowanie broni, pociskow, wrogow, serc, monet i drzwi
         self.set_of_items.draw(surface)
         self.set_of_bullets.draw(surface)
         self.set_of_enemies.draw(surface)
         self.set_of_hearts.draw(surface)
         self.set_of_coins.draw(surface)
         self.set_of_doors.draw(surface)
-
+    #przesuwanie swiata
     def _shift_world(self, shift_x):
         self.world_shift += shift_x
-
+        #przesuwanie platform
         for p in self.set_of_platforms:
             p.rect.x += shift_x
-
+        #przesuwanie broni
         for item in self.set_of_items:
             item.rect.x += shift_x
-
+        #przesuwanie pociskow
         for b in self.set_of_bullets:
             b.rect.x += shift_x
-
+        # przesuwanie wrogow
         for e in self.set_of_enemies:
             e.rect.x += shift_x
-
+        # przesuwanie serc
         for heart in self.set_of_hearts:
             heart.rect.x += shift_x
-
+        # przesuwanie monet
         for coin in self.set_of_coins:
             coin.rect.x += shift_x
-
+        # przesuwanie drzwi
         for door in self.set_of_doors:
             door.rect.x += shift_x
 
-
+    #usuwanie pociskow
     def _delete_bullet(self):
+        #dla kazdego pocisku
         for b in self.set_of_bullets:
             # sprwadzamy kolizje z platformami i usuwamy pocisk
             if pygame.sprite.spritecollideany(b, self.set_of_platforms):
@@ -628,16 +639,15 @@ class Level:
             # sprwadzamy czy pocisk wyleciał poza planszę i usuwamy pocisk
             if b.rect.left > gm.WIDTH or b.rect.right < 0:
                 b.kill()
-
+    #metoda, w ktorej wrog otrzymuje obrazenia
     def _get_damage(self):
         for e in self.set_of_enemies:
             if pygame.sprite.spritecollideany(e, self.set_of_bullets):
                 e.lifes -= 1
-
-    def _respawn(self):
+    #smierc gracza gry osiagnie zadana wysokosc
+    def die_player(self):
         if player.rect.y > 630:
             player.game_over()
-
 
 # klasa planszy nr 1
 class Level_1(Level):
@@ -650,7 +660,7 @@ class Level_1(Level):
         self.create_hearts()
         self.create_coins()
         self.create_doors()
-
+    #tworzenie platform
     def create_platforms(self):
         ws_platform_static = [[50 * 64, 64, 64, gm.HEIGHT - 64],
                               [4 * 64, 64, 100, 350],
@@ -660,11 +670,11 @@ class Level_1(Level):
                               [2*64, 64, 500, 150],
                               [64, 16*64, -128, -100, 'left'],
                               [64, 16*64, 3500, -100, 'right']]
-
+        #dodanie platform do zmiennej
         for ws in ws_platform_static:
             platform_object = Platform(gm.GRASS_LIST, *ws)
             self.set_of_platforms.add(platform_object)
-
+    #tworzenie ruchomych platform
     def create_moving_platforms(self):
         # tworzymy ruchomą platformę (ruch w poziomie)
         mp_x = MovingPlatform(gm.METAL_LIST, 3 * 70, 40, 1600, 350)
@@ -681,34 +691,33 @@ class Level_1(Level):
         mp_y.boundary_bottom = 550
         mp_y.player = self.player
         self.set_of_platforms.add(mp_y)
-
+    #tworzenie broni
     def create_items(self):
         weapon = Item(gm.WEAPON, 'weapon', 100, gm.HEIGHT-120)
         self.set_of_items.add(weapon)
-
+    #tworzenie wrogow
     def create_enemies(self):
         zombie = Enemy(gm.ZOMBIE_WALK_R[0],gm.ZOMBIE_WALK_R,gm.ZOMBIE_WALK_L,gm.ZOMBIE_DEAD_R,gm.ZOMBIE_DEAD_L,gm.ZOMBIE_ATTACK_R,gm.ZOMBIE_ATTACK_L,500,500,1000, movement_x=3,movement_y=600)
         zombie.player = self.player
         self.set_of_enemies.add(zombie)
-
+    #tworzenie serc
     def create_hearts(self):
         heart = Heart(gm.HEART, 'heart', 200, gm.HEIGHT - 120)
         self.set_of_hearts.add(heart)
         heart2 = Heart(gm.HEART, 'heart', 400, gm.HEIGHT - 120)
         self.set_of_hearts.add(heart2)
-
+    #tworzenie monet
     def create_coins(self):
         coin = Coin(gm.COIN1, 'coin', 300, gm.HEIGHT - 120, image_list = gm.COINS)
         coin2 = Coin(gm.COIN1, 'coin', 700, gm.HEIGHT - 120, image_list=gm.COINS)
         self.set_of_coins.add(coin)
         self.set_of_coins.add(coin2)
-
+    #tworzenie drzwi
     def create_doors(self):
         door1 = Door(gm.DRZWI_CZER,'door1', 100+128, 350-64)
         door2 = Door(gm.DRZWI_ZIEL,'door2', 1100+128, 350-64)
         self.set_of_doors.add(door1)
         self.set_of_doors.add(door2)
-
 
 
 # konkretyzacja obiektów
