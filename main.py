@@ -225,20 +225,30 @@ class Player(pygame.sprite.Sprite):
     def _die(self, image_list):
         if self.die_count < 4:
             self.image = image_list[0]
+            self.rect.y += 2
         elif self.die_count < 8:
             self.image = image_list[1]
+            self.rect.y += 2
         elif self.die_count < 12:
             self.image = image_list[2]
+            self.rect.y += 2
         elif self.die_count < 16:
             self.image = image_list[3]
+            self.rect.y += 2
         elif self.die_count < 20:
             self.image = image_list[4]
+            self.rect.y += 2
         elif self.die_count < 24:
             self.image = image_list[5]
+            self.rect.y += 2
         elif self.die_count < 28:
             self.image = image_list[6]
+            self.rect.y += 2
 
         self.die_count += 1
+
+        if self.die_count >= 28:
+            self.door_count = 29
 
     def game_over(self):
         self.number_of_lifes = 0
@@ -247,6 +257,7 @@ class Player(pygame.sprite.Sprite):
         myfont = pygame.font.SysFont('Comic Sans MS', 150)
         textsurface = myfont.render("GAME OVER", False, (0, 0, 0))
         screen.blit(textsurface, (300, -40))
+
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, star_image, image_list_right,
@@ -618,7 +629,7 @@ class Level:
                 e.lifes -= 1
 
     def _respawn(self):
-        if player.rect.y > 680:
+        if player.rect.y > 630:
             player.game_over()
 
 
