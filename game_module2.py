@@ -74,7 +74,6 @@ COIN6 = pygame.image.load(os.path.join('png', 'coin6.png'))
 DRZWI_CZER = pygame.image.load(os.path.join('png', 'drzwi_czerwone.png'))
 DRZWI_ZIEL = pygame.image.load(os.path.join('png', 'drzwi_zielone.png'))
 
-
 # grafika postać
 IMAGES_R = [WALK_R1, WALK_R2, WALK_R3, WALK_R4, WALK_R5, WALK_R6, WALK_R7]
 IMAGES_L = [WALK_L1, WALK_L2, WALK_L3, WALK_L4, WALK_L5, WALK_L6, WALK_L7]
@@ -82,7 +81,7 @@ IMAGES_L = [WALK_L1, WALK_L2, WALK_L3, WALK_L4, WALK_L5, WALK_L6, WALK_L7]
 IMAGES_DIE_R = [DIE_0, DIE_1, DIE_2, DIE_3, DIE_4, DIE_5, DIE_6]
 
 # grafika platformy
-GRASS_LIST = [GRASS_SINGLE, GRASS_L, GRASS_C, GRASS_R]
+GRASS_LIST = [GRASS_SINGLE, GRASS_L, GRASS_C, GRASS_R, GRASS_W_L, GRASS_W_R]
 METAL_LIST = [METAL_SINGLE, METAL_L, METAL_C, METAL_R]
 
 # grafika ściany

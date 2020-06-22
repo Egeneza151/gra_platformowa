@@ -28,6 +28,7 @@ class Player(pygame.sprite.Sprite):
         self.level = None
         self.direction_of_movement = 'right'
         self.die_count = 0
+        self.door_count = 0
 
     def turn_right(self):
         if self.direction_of_movement == 'left':
@@ -152,14 +153,29 @@ class Player(pygame.sprite.Sprite):
                     self.number_of_coins += 1
                     coin.kill()
 
-        else:
-            self.number_of_lifes = 0
-            self._die(gm.IMAGES_DIE_R)
-            screen.fill(gm.DARKRED)
-            myfont = pygame.font.SysFont('Comic Sans MS', 150)
-            textsurface = myfont.render("GAME OVER", False, (0, 0, 0))
-            screen.blit(textsurface, (300, 200))
+            colliding_doors = pygame.sprite.spritecollide(
+                self, self.level.set_of_doors, False)
 
+
+            print(self.door_count)
+            if self.door_count == 0:
+                for door in colliding_doors:
+                    if door.online == True:
+                        if door.name == 'door1':
+                            self.rect.x += 1000
+                        else:
+                            self.rect.x -= 1000
+                        self.door_count += 1
+
+            else:
+                self.door_count += 1
+                if self.door_count == 40:
+                    self.door_count = 0
+                    for door in colliding_doors:
+                        door.online = True
+
+        else:
+            self.game_over()
 
 
     def draw(self, surface):
@@ -223,6 +239,14 @@ class Player(pygame.sprite.Sprite):
             self.image = image_list[6]
 
         self.die_count += 1
+
+    def game_over(self):
+        self.number_of_lifes = 0
+        self._die(gm.IMAGES_DIE_R)
+        screen.fill(gm.DARKRED)
+        myfont = pygame.font.SysFont('Comic Sans MS', 150)
+        textsurface = myfont.render("GAME OVER", False, (0, 0, 0))
+        screen.blit(textsurface, (300, -40))
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, star_image, image_list_right,
@@ -351,10 +375,9 @@ class PlatformEnemy(Enemy):
         else:
             self._count += 1
 
-
 # klasa platformy
 class Platform(pygame.sprite.Sprite):
-    def __init__(self, image_list, width, height, rect_x, rect_y):
+    def __init__(self, image_list, width, height, rect_x, rect_y, flag_position = 'left'):
         super().__init__()
         self.width = width
         self.height = height
@@ -363,10 +386,19 @@ class Platform(pygame.sprite.Sprite):
         self.rect.x = rect_x
         self.rect.y = rect_y
         self.image_list = image_list
+        self.flag_position = flag_position
 
     def draw(self, surface):
         if self.width == 64:
-            surface.blit(self.image_list[0], self.rect)
+            if self.height > 64:
+                if self.flag_position == 'left':
+                    for i in range(64, self.height - 64, 64):
+                        surface.blit(self.image_list[4], [self.rect.x, self.rect.y + i])
+                elif self.flag_position == 'right':
+                    for i in range(64, self.height - 64, 64):
+                        surface.blit(self.image_list[5], [self.rect.x, self.rect.y + i])
+            else:
+                surface.blit(self.image_list[0], self.rect)
         else:
             surface.blit(self.image_list[1], self.rect)
             for i in range(64, self.width - 64, 64):
@@ -480,6 +512,14 @@ class Coin(pygame.sprite.Sprite):
         else:
             self._count += 1
 
+class Door(pygame.sprite.Sprite):
+    def __init__(self, image, name, rect_center_x, rect_center_y):
+        super().__init__()
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.name = name
+        self.rect.center = [rect_center_x, rect_center_y]
+        self.online = True
 
 #ogólna klasa planszy
 class Level:
@@ -490,17 +530,21 @@ class Level:
         self.set_of_enemies = pygame.sprite.Group()
         self.set_of_hearts = pygame.sprite.Group()
         self.set_of_coins = pygame.sprite.Group()
+        self.set_of_doors = pygame.sprite.Group()
         self.player = player
         self.world_shift = 0
 
     def update(self):
         self._delete_bullet()
+        self._respawn()
 
         for p in self.set_of_platforms:
             p.update()
 
         self.set_of_bullets.update()
         self.set_of_enemies.update()
+        self.set_of_doors.update()
+
         for e in self.set_of_coins:
             e.draw(gm.COINS)
 
@@ -526,6 +570,7 @@ class Level:
         self.set_of_enemies.draw(surface)
         self.set_of_hearts.draw(surface)
         self.set_of_coins.draw(surface)
+        self.set_of_doors.draw(surface)
 
     def _shift_world(self, shift_x):
         self.world_shift += shift_x
@@ -548,6 +593,9 @@ class Level:
         for coin in self.set_of_coins:
             coin.rect.x += shift_x
 
+        for door in self.set_of_doors:
+            door.rect.x += shift_x
+
 
     def _delete_bullet(self):
         for b in self.set_of_bullets:
@@ -567,8 +615,11 @@ class Level:
     def _get_damage(self):
         for e in self.set_of_enemies:
             if pygame.sprite.spritecollideany(e, self.set_of_bullets):
-                e.number_of_lives -= 1
+                e.lifes -= 1
 
+    def _respawn(self):
+        if player.rect.y > 680:
+            player.game_over()
 
 
 # klasa planszy nr 1
@@ -581,11 +632,17 @@ class Level_1(Level):
         self.create_enemies()
         self.create_hearts()
         self.create_coins()
+        self.create_doors()
 
     def create_platforms(self):
         ws_platform_static = [[50 * 64, 64, 64, gm.HEIGHT - 64],
-                              [4 * 64, 64, 100, 350],[4 * 64, 64, 1100, 350],
-                              [3 * 64, 64, 800, 500], [64, 64, 800, 250], [2*64, 64, 500, 150]]
+                              [4 * 64, 64, 100, 350],
+                              [4 * 64, 64, 1100, 350],
+                              [3 * 64, 64, 800, 500],
+                              [64, 64, 800, 250],
+                              [2*64, 64, 500, 150],
+                              [64, 16*64, -128, -100, 'left'],
+                              [64, 16*64, 3500, -100, 'right']]
 
         for ws in ws_platform_static:
             platform_object = Platform(gm.GRASS_LIST, *ws)
@@ -629,6 +686,12 @@ class Level_1(Level):
         self.set_of_coins.add(coin)
         self.set_of_coins.add(coin2)
 
+    def create_doors(self):
+        door1 = Door(gm.DRZWI_CZER,'door1', 100+128, 350-64)
+        door2 = Door(gm.DRZWI_ZIEL,'door2', 1100+128, 350-64)
+        self.set_of_doors.add(door1)
+        self.set_of_doors.add(door2)
+
 
 
 # konkretyzacja obiektów
@@ -640,7 +703,9 @@ player.rect.center = screen.get_rect().center
 # głowna pętla gry
 window_open = True
 while window_open:
-    screen.fill(gm.LIGHTBLUE)
+    #screen.fill(gm.LIGHTBLUE)
+    screen.blit(gm.BACKGROUND,(0,0))
+
     myfont = pygame.font.SysFont('Comic Sans MS', 30)
     textsurface = myfont.render(player.get_coins(), False, (0, 0, 0))
     textsurface2 = myfont.render(player.get_lifes(), False, (0, 0, 0))
