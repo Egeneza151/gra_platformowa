@@ -30,41 +30,47 @@ class Player(pygame.sprite.Sprite):
         self.die_count = 0
         self.door_count = 0
 
+    #obrot w prawo
     def turn_right(self):
         if self.direction_of_movement == 'left':
             self.direction_of_movement = 'right'
         self.movement_x = 6
-
+    #obrot w lewo
     def turn_left(self):
         if self.direction_of_movement == 'right':
             self.direction_of_movement = 'left'
         self.movement_x = -6
-
+    #skok
     def jump(self):
         self.rect.y += 2
         colliding_platforms = pygame.sprite.spritecollide(
             self, self.level.set_of_platforms, False)
         self.rect.y -= 2
+        #gdy jest na platformie to moze skoczyc o 14 jednostek do gory
         if colliding_platforms:
             self.movement_y = -14
-
+    #wykonuje strzal
     def shoot(self):
+        #jezeli ma bron i pocuiskow jest mniej niz 2 to moze strzelic
         if self.items.get('weapon', False) and len(self.level.set_of_bullets) < 2:
+            #strzal w prawo
             if self.direction_of_movement == 'right':
                 bullet = Bullet(
                     gm.BULLET_R,self.direction_of_movement,
                     self.rect.centerx, self.rect.centery+15)
+            #strzal w lewo
             else:
                 bullet = Bullet(
                     gm.BULLET_L, self.direction_of_movement,
                     self.rect.centerx, self.rect.centery+15)
 
             self.level.set_of_bullets.add(bullet)
-
+    #zatrzymuje sie
     def stop(self):
         self.movement_x = 0
-
+    #glowna metoda aktualizacji gracza
     def update(self):
+        #jezeli gracz ma wiecej zyc niz 0 to moze kontynuowac gre
         if self.number_of_lifes > 0:
             self._gravitation()
 
