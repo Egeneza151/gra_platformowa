@@ -82,38 +82,38 @@ class Player(pygame.sprite.Sprite):
                 self, self.level.set_of_platforms, False)
 
             for p in colliding_platforms:
-                if self.movement_x > 0:
+                if self.movement_x > 0: #jezeli natrafi na kolizje(bloczek-scianka) zatrzymuje sie
                     self.rect.right = p.rect.left
                 if self.movement_x < 0:
                     self.rect.left = p.rect.right
 
             # animacje
             if self.movement_x > 0:
-                self._move(gm.IMAGES_R)
+                self._move(gm.IMAGES_R)   #obrazy ruchu w prawo pirata
             if self.movement_x < 0:
-                self._move(gm.IMAGES_L)
+                self._move(gm.IMAGES_L) #obrazy ruchu w lewo
 
             # -----------------ruch w pionie ----------------
             self.rect.y += self.movement_y
 
             # sprawdzanie kolizji
             colliding_platforms = pygame.sprite.spritecollide(
-                self, self.level.set_of_platforms, False)
+                self, self.level.set_of_platforms, False)  # jezeli koliduje gracz z platforma
 
-            for p in colliding_platforms:
+            for p in colliding_platforms: #dla kazdej plaformy z ktora koliduje wykonuje kod zawarty w petli
                 if self.movement_y > 0:
-                    self.rect.bottom = p.rect.top
+                    self.rect.bottom = p.rect.top # kolizja platformy z dolna czescia pirata
                     if self.direction_of_movement == 'left' and self.movement_x == 0:
-                        self.image = gm.STAND_L
+                        self.image = gm.STAND_L  #pod scaina koniec animiacji ruchu
                     if self.direction_of_movement == 'right' and self.movement_x == 0:
                         self.image = gm.STAND_R
-                if self.movement_y < 0:
+                if self.movement_y < 0: # jest w powietrzu glowa z dolem platformy
                     self.rect.top = p.rect.bottom
 
                 self.movement_y = 0
 
                 # garcz jedzie razem z platformą
-                if isinstance(p, MovingPlatform) and self.movement_x == 0:
+                if isinstance(p, MovingPlatform) and self.movement_x == 0: #jezeli znajduje sie na ruchomwej platformie to razem z nia
                     self.rect.x += p.movement_x
 
 
@@ -123,10 +123,10 @@ class Player(pygame.sprite.Sprite):
             self.rect.y -= 3
 
             # zmiana grafiki
-            if not colliding_platforms:
+            if not colliding_platforms: # jest w powietrrzu
                 if self.movement_y > 0:
                     if self.direction_of_movement == 'left':
-                        self.image = gm.FALL_L
+                        self.image = gm.FALL_L # animacja spadania
                     else:
                         self.image = gm.FALL_R
                 if self.movement_y < 0:
@@ -165,14 +165,14 @@ class Player(pygame.sprite.Sprite):
 
             #sprawdza kolizje z drzwiami i przesuwa gracza
             print(self.door_count)
-            if self.door_count == 0:
+            if self.door_count == 0: # jezli nie dotknal sie drzwi
                 for door in colliding_doors:
                     if door.online == True:
                         if door.name == 'door1':
                             self.rect.x += 1000
                         else:
-                            self.rect.x -= 1000
-                        self.door_count += 1
+                            self.rect.x -= 1000 # z 2 drzwi do 1  wraca 0 1000
+                        self.door_count += 1 #co 40 klatek
             #operuje na liczniku drzwi, z ktorych mozna ponownie skorzystac
             else:
                 self.door_count += 1
@@ -186,7 +186,7 @@ class Player(pygame.sprite.Sprite):
 
     #rysowanie animacji
     def draw(self, surface):
-        surface.blit(self.image, self.rect)
+        surface.blit(self.image, self.rect) # jaki obraz oraz w jakim miesjcu
     #dzialanie na klawiszach
     def get_event(self, event):
         if event.type == pygame.KEYDOWN:
@@ -201,7 +201,7 @@ class Player(pygame.sprite.Sprite):
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_d and self.movement_x > 0:
                 self.stop()
-                self.image = gm.STAND_R
+                self.image = gm.STAND_R # zatrzymanie postaci w prawej strony
             if event.key == pygame.K_a and self.movement_x < 0:
                 self.stop()
                 self.image = gm.STAND_L
@@ -224,11 +224,11 @@ class Player(pygame.sprite.Sprite):
             self.movement_y += 0.35
     #pobiera ilosc monet
     def get_coins(self):
-        return "COINS: " + str(self.number_of_coins)
+        return "COINS: " + str(self.number_of_coins) #zamienia int'a na stringa
     #pobiera ilosc zyc
     def get_lifes(self):
         return "LIFES: " + str(self.number_of_lifes)
-    #rysuje i przesowa trupa
+    #rysuje i przesuwa trupa co 4 klatki
     def _die(self, image_list):
         if self.die_count < 4:
             self.image = image_list[0]
@@ -254,16 +254,16 @@ class Player(pygame.sprite.Sprite):
 
         self.die_count += 1
         #jezeli licznik sie skonczyl to ustawia licznik na podana liczbe
-        if self.die_count >= 28:
+        if self.die_count >= 28: #klatki smierci
             self.door_count = 29
     #ustawia liczbe zyc na 0 i wykonuje metode smierci oraz rysuje na ekranie zakonczenie gry oraz zmienia tlo
     def game_over(self):
         self.number_of_lifes = 0
-        self._die(gm.IMAGES_DIE_R)
-        screen.fill(gm.DARKRED)
+        self._die(gm.IMAGES_DIE_R)#rysuje animacje smierci
+        screen.fill(gm.DARKRED) #czerwony ekran koniec gry
         myfont = pygame.font.SysFont('Comic Sans MS', 150)
         textsurface = myfont.render("GAME OVER", False, (0, 0, 0))
-        screen.blit(textsurface, (300, -40))
+        screen.blit(textsurface, (300, -40)) # polozenie napisu
 
 #klasa przeciwnika
 class Enemy(pygame.sprite.Sprite):
@@ -422,14 +422,14 @@ class Platform(pygame.sprite.Sprite):
                 #strona prawa
                 elif self.flag_position == 'right':
                     # rysowanie
-                    for i in range(64, self.height - 64, 64):
-                        surface.blit(self.image_list[5], [self.rect.x, self.rect.y + i])
+                    for i in range(64, self.height - 64, 64): #od 64 do podanej wysokosci -64, ze skokiem 64
+                        surface.blit(self.image_list[5], [self.rect.x, self.rect.y + i]) # rysowanie w pionie
             else:
                 surface.blit(self.image_list[0], self.rect)
         else:
             surface.blit(self.image_list[1], self.rect)
             for i in range(64, self.width - 64, 64):
-                surface.blit(self.image_list[2], [self.rect.x + i, self.rect.y])
+                surface.blit(self.image_list[2], [self.rect.x + i, self.rect.y]) # w poziomie
             surface.blit(self.image_list[3], [self.rect.x + self.width - 64, self.rect.y])
 
 # klasa reprezentująca ruchomą platformę
@@ -540,7 +540,7 @@ class Coin(pygame.sprite.Sprite):
 #klasa drzwi
 class Door(pygame.sprite.Sprite):
     def __init__(self, image, name, rect_center_x, rect_center_y):
-        super().__init__()
+        super().__init__() # mozliwosc korzystania z biblioteki
         self.image = image
         self.rect = self.image.get_rect()
         self.name = name
@@ -572,7 +572,7 @@ class Level:
         self.set_of_doors.update()
         #rysowanie monet
         for e in self.set_of_coins:
-            e.draw(gm.COINS)
+            e.draw(gm.COINS) # pobiera z module coiny
 
         # przesunięcie planszy gdy gracz jest zbliża się do prawej krawędzi
         if self.player.rect.right >= 500:
@@ -669,7 +669,9 @@ class Level_1(Level):
                               [64, 64, 800, 250],
                               [2*64, 64, 500, 150],
                               [64, 16*64, -128, -100, 'left'],
-                              [64, 16*64, 3500, -100, 'right']]
+                              [64, 16*64, 3500, -100, 'right'],
+                              [64, 64, 500, 500],
+                              [4*64, 64, 800, 100]]
         #dodanie platform do zmiennej
         for ws in ws_platform_static:
             platform_object = Platform(gm.GRASS_LIST, *ws)
@@ -697,21 +699,26 @@ class Level_1(Level):
         self.set_of_items.add(weapon)
     #tworzenie wrogow
     def create_enemies(self):
-        zombie = Enemy(gm.ZOMBIE_WALK_R[0],gm.ZOMBIE_WALK_R,gm.ZOMBIE_WALK_L,gm.ZOMBIE_DEAD_R,gm.ZOMBIE_DEAD_L,gm.ZOMBIE_ATTACK_R,gm.ZOMBIE_ATTACK_L,500,500,1000, movement_x=3,movement_y=600)
+        zombie = Enemy(gm.ZOMBIE_WALK_R[0],gm.ZOMBIE_WALK_R,gm.ZOMBIE_WALK_L,gm.ZOMBIE_DEAD_R,gm.ZOMBIE_DEAD_L,gm.ZOMBIE_ATTACK_R,gm.ZOMBIE_ATTACK_L,1000,1000,1500, movement_x=1,movement_y=600)
+        zombie2 = Enemy(gm.ZOMBIE_WALK_R[0], gm.ZOMBIE_WALK_R, gm.ZOMBIE_WALK_L, gm.ZOMBIE_DEAD_R, gm.ZOMBIE_DEAD_L,gm.ZOMBIE_ATTACK_R, gm.ZOMBIE_ATTACK_L, 800, 800, 800+3*64, movement_x=2, movement_y=28)
         zombie.player = self.player
+        zombie2.player = self.player
         self.set_of_enemies.add(zombie)
+        self.set_of_enemies.add(zombie2)
     #tworzenie serc
     def create_hearts(self):
         heart = Heart(gm.HEART, 'heart', 200, gm.HEIGHT - 120)
-        self.set_of_hearts.add(heart)
         heart2 = Heart(gm.HEART, 'heart', 400, gm.HEIGHT - 120)
+        self.set_of_hearts.add(heart)
         self.set_of_hearts.add(heart2)
     #tworzenie monet
     def create_coins(self):
         coin = Coin(gm.COIN1, 'coin', 300, gm.HEIGHT - 120, image_list = gm.COINS)
         coin2 = Coin(gm.COIN1, 'coin', 700, gm.HEIGHT - 120, image_list=gm.COINS)
+        coin3 = Coin(gm.COIN1, 'coin', 500, gm.HEIGHT - 120, image_list=gm.COINS)
         self.set_of_coins.add(coin)
         self.set_of_coins.add(coin2)
+        self.set_of_coins.add(coin3)
     #tworzenie drzwi
     def create_doors(self):
         door1 = Door(gm.DRZWI_CZER,'door1', 100+128, 350-64)

@@ -16,10 +16,10 @@ screen = pygame.display.set_mode(SIZESCREEN)
 
 # grafika  - wczytywanie znaków
 file_names = sorted(os.listdir('png'))
-file_names.remove('background.png')
+#file_names.remove('background.png')
 BACKGROUND = pygame.image.load(os.path.join('png', 'background.png')).convert()
 for file_name in file_names:
-    image_name = file_name[:-4]
+    image_name = file_name[:-4] #wszystkie png sa ładowane
     if '_L' in image_name or '_R' in image_name:
         image_name = image_name.upper()
     elif 'L' in image_name:
@@ -74,7 +74,7 @@ COIN6 = pygame.image.load(os.path.join('png', 'coin6.png'))
 DRZWI_CZER = pygame.image.load(os.path.join('png', 'drzwi_czerwone.png'))
 DRZWI_ZIEL = pygame.image.load(os.path.join('png', 'drzwi_zielone.png'))
 
-# grafika postać
+# grafika postać pirat
 IMAGES_R = [WALK_R1, WALK_R2, WALK_R3, WALK_R4, WALK_R5, WALK_R6, WALK_R7]
 IMAGES_L = [WALK_L1, WALK_L2, WALK_L3, WALK_L4, WALK_L5, WALK_L6, WALK_L7]
 
@@ -85,21 +85,13 @@ GRASS_LIST = [GRASS_SINGLE, GRASS_L, GRASS_C, GRASS_R, GRASS_W_L, GRASS_W_R]
 METAL_LIST = [METAL_SINGLE, METAL_L, METAL_C, METAL_R]
 
 # grafika ściany
-WALL_LIST = [WALL, WALL_LEFT, WALL_TOP, WALL_RIGHT, WALL_BOTTOM]
-WALL_CORNER_LIST = [WALL_TOP_L, WALL_TOP_R, WALL_BOTTOM_R, WALL_BOTTOM_L]
+#WALL_LIST = [WALL, WALL_LEFT, WALL_TOP, WALL_RIGHT, WALL_BOTTOM]
+#WALL_CORNER_LIST = [WALL_TOP_L, WALL_TOP_R, WALL_BOTTOM_R, WALL_BOTTOM_L]
 
 #coiny
 COINS = [COIN1, COIN2, COIN3, COIN4, COIN5, COIN6]
 
-# grafika, broń i pociski
 
-# grafika inne
-
-# grafika enemy type 1 - zombie
-# ZOMBIE_WALK_R = [ZOMBIE_WALK_R1, ZOMBIE_WALK_R2]
-# ZOMBIE_WALK_L = [ZOMBIE_WALK_L1, ZOMBIE_WALK_L2]
-# ZOMBIE_DEAD_R = [ZOMBIE_DEAD_R, ZOMBIE_DEAD_R]
-# ZOMBIE_DEAD_L = [ZOMBIE_DEAD_L, ZOMBIE_DEAD_L]
 
 ZOMBIE_WALK_R = [ZOMBIE_WALK1R,ZOMBIE_WALK2R,ZOMBIE_WALK3R,ZOMBIE_WALK4R,ZOMBIE_WALK5R,ZOMBIE_WALK6R]
 ZOMBIE_WALK_L = [ZOMBIE_WALK1L,ZOMBIE_WALK2L,ZOMBIE_WALK3L,ZOMBIE_WALK4L,ZOMBIE_WALK5L,ZOMBIE_WALK6L]
